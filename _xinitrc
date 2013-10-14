@@ -1,0 +1,27 @@
+#!/bin/bash
+# Disable Lenovo X1 Carbon Touchpad
+xinput set-prop 11 133 0
+
+# Poor man's session
+(sleep 1 && /usr/bin/ck-launch-session) &  # do this before nm-applet... I don't know why
+# /usr/bin/stalonetray --geometry 16x16+150-0 --icon-size 16 &
+/usr/bin/stalonetray --geometry 10x1-700+0 --icon-size 10 &
+(sleep 2 && /usr/bin/nm-applet) &
+# conky -c /home/seb/.conky-dwm | while true; do /usr/bin/dwm > /dev/null; done;
+# nm-applet &
+dropbox start &
+eval $(gnome-keyring-daemon --start)
+
+#Update DWM name label
+while true; do 
+    BATTERY=$( acpi -b | sed 's/.*[charging|unknown], \([0-9]*\)%.*/\1/gi' )
+    BATTERY_STATUS=$( acpi -b | sed 's/.*: \([a-zA-Z]*\),.*/\1/gi' )
+    IP=`/sbin/ifconfig wlan0 | grep "inet a" | cut -d: -f2 | cut -d" " -f 1`
+    WLAN0="wlan0:${IP}"
+
+    xsetroot -name "`date` | `uptime | sed 's/.*,//'` | Battery `echo $BATTERY_STATUS $BATTERY%` | `echo $WLAN0`"
+    sleep 1
+done &
+
+#Launch DWM
+exec /usr/local/bin/dwm
